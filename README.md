@@ -1,5 +1,9 @@
 # Dirección de Marketing · SM México
 
+**Abrir en la nube:** https://soytorresllamas.github.io/direccion-de-marketing/
+
+> Requiere activar GitHub Pages una vez (Settings → Pages → branch `main`, carpeta `/docs`). El sitio está cifrado: pide contraseña y luego el acceso de la app. Sincroniza con la base de datos en Supabase.
+
 Herramienta interna para mapear la Dirección de Marketing de Ediciones SM México:
 organigrama editable, roles por persona, funcionamiento del área (funciones con
 responsable, horas/mes e impacto en negocio) y carga por persona.
