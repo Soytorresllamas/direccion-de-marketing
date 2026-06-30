@@ -402,6 +402,15 @@ function AutoTextarea(props: { value: string; onChange: (v: string) => void; pla
 function FuncView(props: { people: Person[]; framework: Framework; setFramework: (fn: (f: Framework) => Framework) => void; }) {
   const { people, framework, setFramework } = props;
   const [onlyGaps, setOnlyGaps] = useState(false);
+  const [filterImpact, setFilterImpact] = useState<string>("");
+  const [filterOwner, setFilterOwner] = useState<string>("");
+  const filtersActive = onlyGaps || filterImpact !== "" || filterOwner !== "";
+  function matchItem(i: FuncItem): boolean {
+    if (onlyGaps && i.owners.length !== 0) return false;
+    if (filterImpact) { if (filterImpact === "none") { if (i.impact !== "") return false; } else if (i.impact !== filterImpact) return false; }
+    if (filterOwner && !i.owners.includes(filterOwner)) return false;
+    return true;
+  }
 
   const setIntro = (v: string) => setFramework((f) => ({ ...f, intro: v }));
   const setBlockTitle = (bid: string, v: string) => setFramework((f) => ({ ...f, blocks: f.blocks.map((b) => (b.id === bid ? { ...b, title: v } : b)) }));
@@ -453,6 +462,25 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
         <div className="ml-auto flex items-center gap-2"><span className="text-xs font-medium text-slate-500">Solo sin responsable</span><Switch checked={onlyGaps} onCheckedChange={setOnlyGaps} /></div>
       </div>
 
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5">
+        <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Filtrar</span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-xs text-slate-500">Impacto:</span>
+          {([["", "Todos"], ["alto", "Alto"], ["medio", "Medio"], ["bajo", "Bajo"], ["none", "Sin clasificar"]] as [string, string][]).map(([v, l]) => (
+            <button key={v || "all"} onClick={() => setFilterImpact(v)} className={"rounded-full border px-2.5 py-0.5 text-xs font-semibold transition " + (filterImpact === v ? "border-blue-300 bg-blue-50 text-blue-700" : "border-slate-200 bg-white text-slate-500 hover:border-slate-300")}>{l}</button>
+          ))}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-slate-500">Persona:</span>
+          <select value={filterOwner} onChange={(e) => setFilterOwner(e.target.value)} className="rounded-md border border-slate-300 px-2 py-1 text-xs outline-none focus:border-blue-500">
+            <option value="">Todas</option>
+            {orderedIds(people).map((id) => { const p = people.find((x) => x.id === id)!; return <option key={id} value={id}>{p.name}</option>; })}
+            {EXT_OWNERS.map((e) => <option key={e.id} value={e.id}>{e.name} (externo)</option>)}
+          </select>
+        </div>
+        {filtersActive && <button onClick={() => { setOnlyGaps(false); setFilterImpact(""); setFilterOwner(""); }} className="text-xs font-semibold text-slate-500 underline hover:text-slate-700">Limpiar filtros</button>}
+      </div>
+
       <div className="mt-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5">
         <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">Horas por impacto en negocio</div>
         <div className="flex h-3 overflow-hidden rounded-full">
@@ -496,7 +524,7 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
         const acc = accentFor(b.id);
         const bUn = b.items.filter((i) => i.owners.length === 0).length;
         const bHours = b.items.reduce((a, i) => a + (i.hours || 0), 0);
-        const items = onlyGaps ? b.items.filter((i) => i.owners.length === 0) : b.items;
+        const items = b.items.filter(matchItem);
         const AccIcon = acc.Icon;
         return (
           <section key={b.id} className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -509,7 +537,7 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
             </div>
             <div className="space-y-2 p-3">
               {items.length === 0
-                ? <div className="px-2 py-6 text-center text-[13px] text-slate-400">{onlyGaps ? "Sin pendientes en este frente." : "Sin funciones todavia."}</div>
+                ? <div className="px-2 py-6 text-center text-[13px] text-slate-400">{filtersActive ? "Ningun resultado con los filtros actuales." : "Sin funciones todavia."}</div>
                 : items.map((item) => (
                   <FwItemRow key={item.id} people={people} item={item}
                     onText={(v) => setItemText(b.id, item.id, v)} onHours={(v) => setItemHours(b.id, item.id, v)} onImpact={(v) => setItemImpact(b.id, item.id, v)}
