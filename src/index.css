@@ -71,3 +71,7 @@
 .tree ul::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid #cbd2dc; width: 0; height: 22px; }
 .tree > li { padding-top: 0; }
 .tree > li::before, .tree > li::after { display: none; }
+
+/* ===== SM brand ===== */
+body { font-family: "Hanken Grotesk", system-ui, -apple-system, sans-serif; background: #EFF1F4; }
+.serif-display { font-family: "Newsreader", Georgia, "Times New Roman", serif; }

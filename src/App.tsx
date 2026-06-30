@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
-import { Users, Plus, Download, RotateCcw, Trash2, X, AlertTriangle, UserPlus, Megaphone, GraduationCap, Layers, Clock, ArrowRight, Minus, Wallet, LogOut } from "lucide-react";
+import { Plus, Download, RotateCcw, Trash2, X, AlertTriangle, UserPlus, Megaphone, GraduationCap, Layers, Clock, ArrowRight, Minus, Wallet, LogOut } from "lucide-react";
 
 const SB_URL = "https://zrooipzscpkagjdpyxic.supabase.co";
 const SB_KEY = "sb_publishable__6P7PyqfzqJ0ZN9YVYidpg_8BccM_1V";
@@ -165,9 +165,9 @@ export default function App() {
   if (!authed) return <LoginScreen onSuccess={() => { try { localStorage.setItem(AUTH_KEY, "1"); } catch { /* ignore */ } setAuthed(true); }} />;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen bg-[#EFF1F4] text-[#15171C]">
       <header className="sticky top-0 z-20 flex flex-wrap items-center gap-3 border-b border-slate-200 bg-white px-5 py-3">
-        <div className="flex items-center gap-2 font-bold tracking-tight"><Users className="h-4 w-4 text-blue-600" />Direccion de Marketing · SM Mexico</div>
+        <div className="flex items-center gap-3"><SMLogo /><span className="hidden text-[11px] font-bold uppercase tracking-[0.14em] text-[#B00418] sm:inline">Direccion de Marketing</span></div>
         <span className="text-xs font-medium text-slate-500">{people.length} personas</span>
         <div className="ml-auto flex gap-2">
           <Button variant="outline" size="sm" onClick={exportAll}><Download className="mr-1 h-3.5 w-3.5" />Exportar</Button>
@@ -180,10 +180,10 @@ export default function App() {
       <Tabs defaultValue="org" className="w-full">
         <div className="border-b border-slate-200 bg-white px-4">
           <TabsList className="h-11 bg-transparent p-0">
-            <TabsTrigger value="org" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600">Organigrama</TabsTrigger>
-            <TabsTrigger value="roles" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600">Roles</TabsTrigger>
-            <TabsTrigger value="func" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600">Funcionamiento</TabsTrigger>
-            <TabsTrigger value="presupuesto" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600">Presupuesto</TabsTrigger>
+            <TabsTrigger value="org" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-[#E40521] data-[state=active]:text-[#E40521]">Organigrama</TabsTrigger>
+            <TabsTrigger value="roles" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-[#E40521] data-[state=active]:text-[#E40521]">Roles</TabsTrigger>
+            <TabsTrigger value="func" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-[#E40521] data-[state=active]:text-[#E40521]">Funcionamiento</TabsTrigger>
+            <TabsTrigger value="presupuesto" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-[#E40521] data-[state=active]:text-[#E40521]">Presupuesto</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="org" className="mt-0"><OrgView people={people} setPeople={setPeople} countOwned={countOwned} /></TabsContent>
@@ -253,10 +253,10 @@ function OrgView(props: { people: Person[]; setPeople: (fn: (p: Person[]) => Per
           onDragLeave={() => setOverId((o) => (o === id ? null : o))}
           onDrop={(e) => { e.preventDefault(); if (dragId && canDrop(id)) doReparent(dragId, id); setDragId(null); setOverId(null); }}
           onClick={() => setEditId(id)}
-          className={"relative w-[210px] cursor-pointer rounded-xl border p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md " + (isRoot ? "border-slate-900 bg-slate-900 text-white " : "border-slate-200 bg-white ") + (dragging ? "opacity-40 " : "") + (dropOk ? "ring-2 ring-blue-500 border-blue-400 " : "")}>
+          className={"relative w-[210px] cursor-pointer rounded-xl border p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md " + (isRoot ? "border-slate-900 bg-slate-900 text-white " : "border-slate-200 bg-white ") + (dragging ? "opacity-40 " : "") + (dropOk ? "ring-2 ring-[#E40521] border-[#E40521] " : "")}>
           <div className="text-[13.5px] font-bold leading-tight tracking-tight">{n.name || "(sin nombre)"}</div>
           <div className={"mt-0.5 text-xs " + (isRoot ? "text-slate-300" : "text-slate-500")}>{n.title}</div>
-          {cnt > 0 && <div className="mt-2"><span className={"rounded-md border px-1.5 py-px text-[10.5px] font-bold " + (isRoot ? "border-white/25 bg-white/10 text-slate-200" : "border-blue-200 bg-blue-50 text-blue-700")}>{cnt} func.</span></div>}
+          {cnt > 0 && <div className="mt-2"><span className={"rounded-md border px-1.5 py-px text-[10.5px] font-bold " + (isRoot ? "border-white/25 bg-white/10 text-slate-200" : "border-[#EFA6AD] bg-[#FCEBED] text-[#B00418]")}>{cnt} func.</span></div>}
           {hasRole(n) && <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-emerald-500" title="Rol documentado" />}
         </div>
         {kids.length > 0 && <ul>{kids.map((k) => renderNode(k.id))}</ul>}
@@ -360,7 +360,7 @@ function RolesView(props: { people: Person[]; setPeople: (fn: (p: Person[]) => P
         {ids.map((id) => {
           const p = people.find((x) => x.id === id)!; const active = id === sel;
           return (
-            <button key={id} onClick={() => setSel(id)} className={"mb-0.5 block w-full rounded-lg border px-3 py-2.5 text-left " + (active ? "border-indigo-200 bg-indigo-50" : "border-transparent hover:bg-slate-100")}>
+            <button key={id} onClick={() => setSel(id)} className={"mb-0.5 block w-full rounded-lg border px-3 py-2.5 text-left " + (active ? "border-[#EFA6AD] bg-[#FCEBED]" : "border-transparent hover:bg-slate-100")}>
               <div className="text-[13px] font-bold">{p.parent === null && <span className="text-blue-600">▸ </span>}{p.name || "(sin nombre)"}</div>
               <div className="mt-px text-[11.5px] text-slate-500">{p.title}</div>
             </button>
@@ -370,7 +370,7 @@ function RolesView(props: { people: Person[]; setPeople: (fn: (p: Person[]) => P
       </aside>
 
       <section className="max-w-[760px] flex-1 overflow-y-auto px-8 pb-24 pt-6">
-        <Input value={n.name} onChange={(e) => patch("name", e.target.value)} className="border-0 border-b border-dashed border-transparent px-0 text-[19px] font-extrabold tracking-tight focus-visible:border-blue-500 focus-visible:ring-0" />
+        <Input value={n.name} onChange={(e) => patch("name", e.target.value)} className="border-0 border-b border-dashed border-transparent px-0 text-[19px] font-extrabold tracking-tight focus-visible:border-[#E40521] focus-visible:ring-0" />
         <Input value={n.title} onChange={(e) => patch("title", e.target.value)} placeholder="Titulo / Puesto" className="mt-1 max-w-[420px]" />
         <div className="mb-5 mt-2 text-xs text-slate-500">{boss ? <>Reporta a <b className="text-slate-700">{boss.name}</b>{boss.title ? " · " + boss.title : ""}</> : "Cabeza del organigrama"}</div>
 
@@ -417,7 +417,7 @@ function LinesMultiSelect(props: { selected: string[]; onToggle: (line: string) 
       {LINE_OPTIONS.map((line) => {
         const on = props.selected.includes(line);
         return (
-          <button key={line} onClick={() => props.onToggle(line)} className={"rounded-full border px-3 py-1 text-xs font-semibold transition " + (on ? "border-blue-300 bg-blue-50 text-blue-700" : "border-slate-200 bg-white text-slate-500 hover:border-slate-300")}>
+          <button key={line} onClick={() => props.onToggle(line)} className={"rounded-full border px-3 py-1 text-xs font-semibold transition " + (on ? "border-[#EFA6AD] bg-[#FCEBED] text-[#B00418]" : "border-slate-200 bg-white text-slate-500 hover:border-slate-300")}>
             {on ? "✓ " : ""}{line}
           </button>
         );
@@ -502,7 +502,7 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
 
   return (
     <div className="mx-auto max-w-[920px] px-6 pb-24 pt-7">
-      <h2 className="text-lg font-extrabold tracking-tight text-slate-900">Como funciona la Direccion de Marketing</h2>
+      <h2 className="serif-display text-2xl font-bold tracking-tight text-[#15171C]">Como funciona la Direccion de Marketing</h2>
       <p className="mt-0.5 text-[13px] text-slate-500">Cada funcion tiene responsables, horas/mes e impacto en negocio. Lo que asignes aqui se refleja en Organigrama y Roles.</p>
 
       <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
@@ -525,7 +525,7 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-xs text-slate-500">Impacto:</span>
           {([["", "Todos"], ["alto", "Alto"], ["medio", "Medio"], ["bajo", "Bajo"], ["none", "Sin clasificar"]] as [string, string][]).map(([v, l]) => (
-            <button key={v || "all"} onClick={() => setFilterImpact(v)} className={"rounded-full border px-2.5 py-0.5 text-xs font-semibold transition " + (filterImpact === v ? "border-blue-300 bg-blue-50 text-blue-700" : "border-slate-200 bg-white text-slate-500 hover:border-slate-300")}>{l}</button>
+            <button key={v || "all"} onClick={() => setFilterImpact(v)} className={"rounded-full border px-2.5 py-0.5 text-xs font-semibold transition " + (filterImpact === v ? "border-[#EFA6AD] bg-[#FCEBED] text-[#B00418]" : "border-slate-200 bg-white text-slate-500 hover:border-slate-300")}>{l}</button>
           ))}
         </div>
         <div className="flex items-center gap-1.5">
@@ -540,7 +540,7 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
       </div>
 
       <div className="mt-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5">
-        <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">Horas por impacto en negocio{filtersActive && <span className="ml-2 normal-case text-blue-600">· filtrado</span>}</div>
+        <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">Horas por impacto en negocio{filtersActive && <span className="ml-2 normal-case text-[#E40521]">· filtrado</span>}</div>
         <div className="flex h-3 overflow-hidden rounded-full">
           {(["alto", "medio", "bajo", ""] as Impact[]).map((im) => { const w = (ibh[im] / impactTotal) * 100; if (w <= 0) return null; return <div key={im || "none"} className={IMPACT_BAR[im]} style={{ width: w + "%" }} title={(im || "sin clasificar") + ": " + ibh[im] + " h"} />; })}
         </div>
@@ -638,10 +638,25 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
 function Legend(props: { color: string; label: string }) {
   return <span className="inline-flex items-center gap-1.5"><span className={"h-2.5 w-2.5 rounded-sm " + props.color} />{props.label}</span>;
 }
+function SMLogo(props: { size?: number; showText?: boolean }) {
+  const s = props.size || 30;
+  return (
+    <span className="inline-flex items-center gap-2">
+      <svg width={s} height={s} viewBox="0 0 64 64" className="shrink-0" role="img" aria-label="SM"><rect width="64" height="64" rx="13" fill="#E40521" /><path d="M25 17 L46 32 L25 47 Z" fill="#ffffff" /></svg>
+      {props.showText !== false && (
+        <span className="flex items-baseline gap-1.5">
+          <span className="text-[18px] font-extrabold tracking-tight text-[#15171C]">SM</span>
+          <span className="text-slate-300">|</span>
+          <span className="text-[13px] font-semibold text-slate-500">Mexico</span>
+        </span>
+      )}
+    </span>
+  );
+}
 function SyncBadge(props: { status: string; onRefresh: () => void }) {
   const map: Record<string, { text: string; dot: string; cls: string }> = {
     local: { text: "Local", dot: "bg-slate-400", cls: "text-slate-500" },
-    saving: { text: "Guardando", dot: "bg-blue-500", cls: "text-blue-600" },
+    saving: { text: "Guardando", dot: "bg-slate-500", cls: "text-slate-600" },
     synced: { text: "En la nube", dot: "bg-emerald-500", cls: "text-emerald-600" },
     offline: { text: "Sin conexion", dot: "bg-amber-500", cls: "text-amber-600" },
   };
@@ -664,7 +679,7 @@ function ModuleLabel(props: { children: ReactNode; hint?: string }) {
 function Stat(props: { label: string; value: number; warn?: boolean }) {
   return (
     <div className="flex items-center gap-2">
-      <span className={"text-2xl font-extrabold tabular-nums " + (props.warn ? "text-amber-600" : "text-slate-900")}>{props.value}</span>
+      <span className={"serif-display text-[26px] font-bold tabular-nums " + (props.warn ? "text-amber-600" : "text-[#15171C]")}>{props.value}</span>
       <span className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{props.warn && <AlertTriangle className="h-3 w-3 text-amber-500" />}{props.label}</span>
     </div>
   );
@@ -735,16 +750,16 @@ function LoginScreen(props: { onSuccess: () => void }) {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <form onSubmit={submit} className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
         <div className="mb-6 flex flex-col items-center text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-900 text-sm font-extrabold tracking-tight text-white">SM</div>
-          <h1 className="mt-3 text-lg font-extrabold tracking-tight text-slate-900">Direccion de Marketing</h1>
-          <p className="text-xs text-slate-500">SM Mexico</p>
+          <SMLogo size={44} showText={false} />
+          <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#B00418]">SM Mexico</div>
+          <h1 className="serif-display mt-1.5 text-2xl font-bold tracking-tight text-[#15171C]">Direccion de Marketing</h1>
         </div>
         <label className="mb-1.5 block text-[11.5px] font-bold uppercase tracking-wide text-slate-500">Usuario</label>
         <Input value={u} onChange={(e) => setU(e.target.value)} placeholder="Usuario" autoFocus />
         <label className="mb-1.5 mt-4 block text-[11.5px] font-bold uppercase tracking-wide text-slate-500">Contrasena</label>
         <Input type="password" value={p} onChange={(e) => setP(e.target.value)} placeholder="Contrasena" />
         {err && <p className="mt-3 text-[12.5px] font-medium text-red-600">Usuario o contrasena incorrectos.</p>}
-        <Button type="submit" className="mt-5 w-full">Entrar</Button>
+        <Button type="submit" className="mt-5 w-full bg-[#E40521] text-white hover:bg-[#B00418]">Entrar</Button>
       </form>
     </div>
   );
