@@ -412,14 +412,26 @@ function RolesView(props: { people: Person[]; setPeople: (fn: (p: Person[]) => P
   );
 }
 
+const LINE_COLORS: Record<string, string> = {
+  "FSM": "#7A4A86",
+  "Vivo": "#2563B0",
+  "Texto": "#E40521",
+  "Dayton": "#B5841C",
+  "Escuela Católica": "#2C8A7B",
+  "Otros": "#646A75",
+};
 function LinesMultiSelect(props: { selected: string[]; onToggle: (line: string) => void }) {
   return (
     <div className="flex flex-wrap gap-1.5">
       {LINE_OPTIONS.map((line) => {
         const on = props.selected.includes(line);
+        const c = LINE_COLORS[line] || "#646A75";
         return (
-          <button key={line} onClick={() => props.onToggle(line)} className={"rounded-full border px-3 py-1 text-xs font-semibold transition " + (on ? "border-[#EFA6AD] bg-[#FCEBED] text-[#B00418]" : "border-slate-200 bg-white text-slate-500 hover:border-slate-300")}>
-            {on ? "✓ " : ""}{line}
+          <button key={line} onClick={() => props.onToggle(line)}
+            style={on ? { borderColor: c, color: c, backgroundColor: c + "1A" } : undefined}
+            className={"inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition " + (on ? "" : "border-slate-200 bg-white text-slate-500 hover:border-slate-300")}>
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: c, opacity: on ? 1 : 0.45 }} />
+            {line}
           </button>
         );
       })}
