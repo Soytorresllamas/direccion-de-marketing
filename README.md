@@ -17,6 +17,9 @@ Para activarlo (una sola vez, desde la web de GitHub):
 
 > Nota de privacidad: en un plan estándar, un sitio de GitHub Pages es accesible públicamente por su URL aunque el repo sea privado. La ventana de acceso de la app es solo disuasoria; no protege el contenido frente a quien tenga el enlace.
 
+
+> El sitio publicado en `docs/index.html` está **cifrado con StatiCrypt 3.5.4** (AES-256). Al abrir el enlace se pide una contraseña y el contenido viaja cifrado; sin la contraseña no se puede leer. Esto sí protege el contenido aunque la URL de Pages sea pública.
+
 Código del repo (navegador): https://github.com/Soytorresllamas/direccion-de-marketing
 
 ## Pestañas
