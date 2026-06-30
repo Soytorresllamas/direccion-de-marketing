@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "re
 import {
   type AppState, type Person, type Framework, type FuncItem, type Impact, type Handoff,
   LINE_OPTIONS, DEFAULT_PEOPLE, DEFAULT_FRAMEWORK, EXT_OWNERS, DOTTED, STORE_KEY, uid, SEED_VERSION, CAPACITY_HOURS, COORD_PER_REPORT,
-  childrenOf, rootId, orderedIds, descendants, autoCoordHours, coordHoursFor, ownerName, isExt, functionsOwnedBy, personHours, hoursByImpact, hasRole,
+  childrenOf, rootId, orderedIds, descendants, autoCoordHours, coordHoursFor, ownerName, isExt, functionsOwnedBy, hasRole,
 } from "./data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
-import { Users, Plus, Download, RotateCcw, Trash2, X, AlertTriangle, UserPlus, Megaphone, GraduationCap, Layers, Clock, ArrowRight, ArrowLeftRight, Minus, Wallet, LogOut } from "lucide-react";
+import { Users, Plus, Download, RotateCcw, Trash2, X, AlertTriangle, UserPlus, Megaphone, GraduationCap, Layers, Clock, ArrowRight, Minus, Wallet, LogOut } from "lucide-react";
 
 function clone<T>(x: T): T { return JSON.parse(JSON.stringify(x)) as T; }
 function defaultHoursOrNull(text: string): number | null {
@@ -427,15 +427,20 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
   const delHandoff = (id: string) => setFramework((f) => ({ ...f, handoffs: f.handoffs.filter((h) => h.id !== id) }));
 
   const allItems = framework.blocks.flatMap((b) => b.items);
+  const filteredItems = allItems.filter(matchItem);
   const total = allItems.length;
   const unassigned = allItems.filter((i) => i.owners.length === 0).length;
   const totalHours = allItems.reduce((a, i) => a + (i.hours || 0), 0);
-  const ibh = hoursByImpact(framework);
+
+  // Las graficas responden a los filtros activos.
+  const ibh: Record<string, number> = { alto: 0, medio: 0, bajo: 0, "": 0 };
+  filteredItems.forEach((i) => { ibh[i.impact || ""] += i.hours || 0; });
   const impactTotal = Math.max(1, ibh.alto + ibh.medio + ibh.bajo + ibh[""]);
 
+  const fnHours = (pid: string) => { let h = 0; filteredItems.forEach((i) => { if (i.owners.includes(pid) && i.owners.length > 0) h += (i.hours || 0) / i.owners.length; }); return h; };
   const loadRows = orderedIds(people)
-    .map((id) => { const fh = personHours(framework, id); const ch = coordHoursFor(people, id); return { id, name: ownerName(people, id), fh, ch, hours: fh + ch, ext: false }; })
-    .concat(EXT_OWNERS.map((e) => { const fh = personHours(framework, e.id); return { id: e.id, name: e.name, fh, ch: 0, hours: fh, ext: true }; }))
+    .map((id) => { const fh = fnHours(id); const ch = filtersActive ? 0 : coordHoursFor(people, id); return { id, name: ownerName(people, id), fh, ch, hours: fh + ch, ext: false }; })
+    .concat(EXT_OWNERS.map((e) => { const fh = fnHours(e.id); return { id: e.id, name: e.name, fh, ch: 0, hours: fh, ext: true }; }))
     .filter((x) => x.hours > 0).sort((a, b) => b.hours - a.hours);
   const maxHours = Math.max(CAPACITY_HOURS, ...loadRows.map((x) => x.hours));
   function barColor(hours: number, ext: boolean): string {
@@ -453,7 +458,9 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
         <AutoTextarea value={framework.intro} onChange={setIntro} placeholder="Resumen de la logica del area..." className="text-[13px] leading-relaxed text-slate-600" />
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3">
+      <div className="mt-5 rounded-2xl border-2 border-slate-200 bg-slate-50/60 p-4">
+        <ModuleLabel hint="Métricas y carga del área. Responde a los filtros.">Resumen y carga</ModuleLabel>
+      <div className="flex flex-wrap items-center gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3">
         <Stat label="Funciones" value={total} />
         <div className="h-8 w-px bg-slate-200" />
         <Stat label="Sin responsable" value={unassigned} warn={unassigned > 0} />
@@ -482,7 +489,7 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
       </div>
 
       <div className="mt-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5">
-        <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">Horas por impacto en negocio</div>
+        <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">Horas por impacto en negocio{filtersActive && <span className="ml-2 normal-case text-blue-600">· filtrado</span>}</div>
         <div className="flex h-3 overflow-hidden rounded-full">
           {(["alto", "medio", "bajo", ""] as Impact[]).map((im) => { const w = (ibh[im] / impactTotal) * 100; if (w <= 0) return null; return <div key={im || "none"} className={IMPACT_BAR[im]} style={{ width: w + "%" }} title={(im || "sin clasificar") + ": " + ibh[im] + " h"} />; })}
         </div>
@@ -497,7 +504,7 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
       {loadRows.length > 0 && (
         <div className="mt-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5">
           <div className="mb-2.5 flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Carga por persona (h/mes, incl. coordinacion)</span>
+            <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Carga por persona ({filtersActive ? "filtrado, sin coordinacion" : "h/mes, incl. coordinacion"})</span>
             <span className="text-[11px] text-slate-400">Referencia: {CAPACITY_HOURS} h/mes = tiempo completo</span>
           </div>
           <div className="space-y-1.5">
@@ -519,7 +526,10 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
           </div>
         </div>
       )}
+      </div>
 
+      <div className="mt-6">
+        <ModuleLabel hint="Las áreas y sus funciones: responsable, horas e impacto.">Frentes del área</ModuleLabel>
       {framework.blocks.map((b) => {
         const acc = accentFor(b.id);
         const bUn = b.items.filter((i) => i.owners.length === 0).length;
@@ -548,12 +558,12 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
           </section>
         );
       })}
+        <div className="mt-4"><Button variant="outline" size="sm" onClick={addBlock}><Plus className="mr-1 h-3.5 w-3.5" />Agregar frente</Button></div>
+      </div>
 
-      <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50"><ArrowLeftRight className="h-4 w-4 text-violet-600" /></span>
-          <div className="flex-1"><div className="text-[15px] font-extrabold tracking-tight text-slate-900">Traspasos entre areas</div><div className="text-[11.5px] text-slate-500">Las interfaces donde el valor pasa de un area a otra. Aqui es donde se cae la pelota.</div></div>
-        </div>
+      <div className="mt-6">
+        <ModuleLabel hint="Las interfaces donde el valor pasa de un área a otra. Aquí es donde se cae la pelota.">Traspasos entre áreas</ModuleLabel>
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="space-y-2 p-3">
           {framework.handoffs.map((h) => (
             <div key={h.id} className="group rounded-lg border border-slate-200 bg-white px-3 py-2.5 hover:border-slate-300">
@@ -569,14 +579,22 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
           <button onClick={addHandoff} className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-300 py-2 text-xs font-semibold text-slate-500 hover:border-slate-400 hover:bg-slate-50"><Plus className="h-3.5 w-3.5" />Agregar traspaso</button>
         </div>
       </section>
-
-      <div className="mt-5"><Button variant="outline" size="sm" onClick={addBlock}><Plus className="mr-1 h-3.5 w-3.5" />Agregar frente</Button></div>
+      </div>
     </div>
   );
 }
 
 function Legend(props: { color: string; label: string }) {
   return <span className="inline-flex items-center gap-1.5"><span className={"h-2.5 w-2.5 rounded-sm " + props.color} />{props.label}</span>;
+}
+function ModuleLabel(props: { children: ReactNode; hint?: string }) {
+  return (
+    <div className="mb-3 flex items-center gap-3">
+      <h3 className="shrink-0 text-[12px] font-extrabold uppercase tracking-wider text-slate-600">{props.children}</h3>
+      {props.hint && <span className="hidden min-w-0 shrink truncate text-[11px] text-slate-400 md:inline">{props.hint}</span>}
+      <div className="h-px flex-1 bg-slate-200" />
+    </div>
+  );
 }
 function Stat(props: { label: string; value: number; warn?: boolean }) {
   return (
