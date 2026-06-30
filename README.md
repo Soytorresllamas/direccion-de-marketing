@@ -5,6 +5,15 @@ organigrama editable, roles por persona, funcionamiento del área (funciones con
 responsable, horas/mes e impacto en negocio) y carga por persona.
 
 
+
+## Sincronización en la nube (Supabase)
+
+Los datos se guardan en una base de datos Supabase (proyecto `direccion-marketing-sm`), compartida entre dispositivos y personas. La app carga el estado desde la nube al abrir y escribe los cambios automáticamente (con un pequeño retardo). Si no hay conexión, sigue funcionando con una copia local (localStorage) y reintenta al volver la red.
+
+- Indicador en el encabezado: **En la nube** / **Guardando** / **Sin conexión** / **Local**. Clic para forzar sincronización.
+- Concurrencia: gana la última escritura (last-write-wins). Adecuado para edición no simultánea.
+- Nota: dentro del panel de Cowork la red está restringida, así que ahí trabaja en modo local; la sincronización en la nube ocurre al abrir la app en un navegador o vía GitHub Pages.
+
 ## Ver en el navegador
 
 Publicable con **GitHub Pages**: https://soytorresllamas.github.io/direccion-de-marketing/

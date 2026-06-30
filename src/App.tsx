@@ -13,6 +13,26 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Switch } from "@/components/ui/switch";
 import { Users, Plus, Download, RotateCcw, Trash2, X, AlertTriangle, UserPlus, Megaphone, GraduationCap, Layers, Clock, ArrowRight, Minus, Wallet, LogOut } from "lucide-react";
 
+const SB_URL = "https://zrooipzscpkagjdpyxic.supabase.co";
+const SB_KEY = "sb_publishable__6P7PyqfzqJ0ZN9YVYidpg_8BccM_1V";
+const SB_HEADERS: Record<string, string> = { apikey: SB_KEY, Authorization: "Bearer " + SB_KEY };
+async function cloudGet(): Promise<AppState | null> {
+  const r = await fetch(SB_URL + "/rest/v1/app_state?id=eq.1&select=data", { headers: SB_HEADERS });
+  if (!r.ok) throw new Error("get " + r.status);
+  const rows = await r.json();
+  return rows.length ? (rows[0].data as AppState) : null;
+}
+async function cloudPut(st: AppState): Promise<boolean> {
+  try {
+    const r = await fetch(SB_URL + "/rest/v1/app_state?on_conflict=id", {
+      method: "POST",
+      headers: { ...SB_HEADERS, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=minimal" },
+      body: JSON.stringify({ id: 1, data: st, updated_at: new Date().toISOString() }),
+    });
+    return r.ok;
+  } catch { return false; }
+}
+
 function clone<T>(x: T): T { return JSON.parse(JSON.stringify(x)) as T; }
 function defaultHoursOrNull(text: string): number | null {
   for (const b of DEFAULT_FRAMEWORK.blocks) for (const i of b.items) if (i.text === text) return i.hours;
@@ -70,7 +90,37 @@ export default function App() {
   function logout() { try { localStorage.removeItem(AUTH_KEY); } catch { /* ignore */ } setAuthed(false); }
   const [state, setState] = useState<AppState>(loadState);
   const { people, framework } = state;
-  useEffect(() => { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch { /* ignore */ } }, [state]);
+  const [sync, setSync] = useState<"local" | "saving" | "synced" | "offline">("local");
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const cloudReady = useRef(false);
+  const writeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Carga inicial desde la nube (o siembra si esta vacia). Si no hay red, usa el estado local.
+  useEffect(() => {
+    let cancelled = false;
+    cloudGet().then((data) => {
+      if (cancelled) return;
+      if (data) { setState(migrate(data)); setSync("synced"); }
+      else { cloudPut(stateRef.current).then((ok) => setSync(ok ? "synced" : "offline")); }
+      cloudReady.current = true;
+    }).catch(() => { if (!cancelled) { setSync("offline"); cloudReady.current = true; } });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Persistencia: localStorage siempre + nube (con debounce) tras la carga inicial.
+  useEffect(() => {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch { /* ignore */ }
+    if (!cloudReady.current) return;
+    setSync("saving");
+    if (writeTimer.current) clearTimeout(writeTimer.current);
+    writeTimer.current = setTimeout(() => { cloudPut(state).then((ok) => setSync(ok ? "synced" : "offline")); }, 800);
+  }, [state]);
+
+  function refreshCloud() {
+    setSync("saving");
+    cloudGet().then((data) => { if (data) setState(migrate(data)); setSync(data ? "synced" : "offline"); }).catch(() => setSync("offline"));
+  }
 
   const setPeople = (fn: (p: Person[]) => Person[]) => setState((s) => ({ ...s, people: fn(s.people) }));
   const setFramework = (fn: (f: Framework) => Framework) => setState((s) => ({ ...s, framework: fn(s.framework) }));
@@ -122,6 +172,7 @@ export default function App() {
         <div className="ml-auto flex gap-2">
           <Button variant="outline" size="sm" onClick={exportAll}><Download className="mr-1 h-3.5 w-3.5" />Exportar</Button>
           <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={resetAll}><RotateCcw className="mr-1 h-3.5 w-3.5" />Restaurar</Button>
+          <SyncBadge status={sync} onRefresh={refreshCloud} />
           <Button variant="ghost" size="sm" onClick={logout} title="Cerrar sesion"><LogOut className="h-3.5 w-3.5" /></Button>
         </div>
       </header>
@@ -586,6 +637,20 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
 
 function Legend(props: { color: string; label: string }) {
   return <span className="inline-flex items-center gap-1.5"><span className={"h-2.5 w-2.5 rounded-sm " + props.color} />{props.label}</span>;
+}
+function SyncBadge(props: { status: string; onRefresh: () => void }) {
+  const map: Record<string, { text: string; dot: string; cls: string }> = {
+    local: { text: "Local", dot: "bg-slate-400", cls: "text-slate-500" },
+    saving: { text: "Guardando", dot: "bg-blue-500", cls: "text-blue-600" },
+    synced: { text: "En la nube", dot: "bg-emerald-500", cls: "text-emerald-600" },
+    offline: { text: "Sin conexion", dot: "bg-amber-500", cls: "text-amber-600" },
+  };
+  const s = map[props.status] || map.local;
+  return (
+    <button onClick={props.onRefresh} title="Sincronizar con la nube" className={"inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold hover:bg-slate-50 " + s.cls}>
+      <span className={"h-1.5 w-1.5 rounded-full " + s.dot} />{s.text}
+    </button>
+  );
 }
 function ModuleLabel(props: { children: ReactNode; hint?: string }) {
   return (
