@@ -4,6 +4,7 @@ import {
   LINE_OPTIONS, DEFAULT_PEOPLE, DEFAULT_FRAMEWORK, EXT_OWNERS, DOTTED, STORE_KEY, uid, SEED_VERSION, CAPACITY_HOURS, COORD_PER_REPORT,
   childrenOf, rootId, orderedIds, descendants, autoCoordHours, coordHoursFor, ownerName, isExt, functionsOwnedBy, hasRole,
 } from "./data";
+import { SM_LOGO } from "./logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -167,7 +168,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#EFF1F4] text-[#15171C]">
       <header className="sticky top-0 z-20 flex flex-wrap items-center gap-3 border-b border-slate-200 bg-white px-5 py-3">
-        <div className="flex items-center gap-3"><SMLogo /><span className="hidden text-[11px] font-bold uppercase tracking-[0.14em] text-[#B00418] sm:inline">Direccion de Marketing</span></div>
+        <div className="flex items-center"><SMLogo /></div>
         <span className="text-xs font-medium text-slate-500">{people.length} personas</span>
         <div className="ml-auto flex gap-2">
           <Button variant="outline" size="sm" onClick={exportAll}><Download className="mr-1 h-3.5 w-3.5" />Exportar</Button>
@@ -638,16 +639,15 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
 function Legend(props: { color: string; label: string }) {
   return <span className="inline-flex items-center gap-1.5"><span className={"h-2.5 w-2.5 rounded-sm " + props.color} />{props.label}</span>;
 }
-function SMLogo(props: { size?: number; showText?: boolean }) {
-  const s = props.size || 30;
+function SMLogo(props: { height?: number; showRegion?: boolean }) {
+  const h = props.height || 26;
   return (
-    <span className="inline-flex items-center gap-2">
-      <svg width={s} height={s} viewBox="0 0 64 64" className="shrink-0" role="img" aria-label="SM"><rect width="64" height="64" rx="13" fill="#E40521" /><path d="M25 17 L46 32 L25 47 Z" fill="#ffffff" /></svg>
-      {props.showText !== false && (
+    <span className="inline-flex items-center gap-2.5">
+      <img src={SM_LOGO} alt="SM Mexico" style={{ height: h }} className="block w-auto" />
+      {props.showRegion !== false && (
         <span className="flex items-baseline gap-1.5">
-          <span className="text-[18px] font-extrabold tracking-tight text-[#15171C]">SM</span>
           <span className="text-slate-300">|</span>
-          <span className="text-[13px] font-semibold text-slate-500">Mexico</span>
+          <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">Mexico</span>
         </span>
       )}
     </span>
@@ -750,9 +750,9 @@ function LoginScreen(props: { onSuccess: () => void }) {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <form onSubmit={submit} className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
         <div className="mb-6 flex flex-col items-center text-center">
-          <SMLogo size={44} showText={false} />
-          <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#B00418]">SM Mexico</div>
-          <h1 className="serif-display mt-1.5 text-2xl font-bold tracking-tight text-[#15171C]">Direccion de Marketing</h1>
+          <SMLogo height={34} showRegion={false} />
+          <h1 className="serif-display mt-3 text-2xl font-bold tracking-tight text-[#15171C]">Direccion de Marketing</h1>
+          <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#B00418]">SM Mexico</p>
         </div>
         <label className="mb-1.5 block text-[11.5px] font-bold uppercase tracking-wide text-slate-500">Usuario</label>
         <Input value={u} onChange={(e) => setU(e.target.value)} placeholder="Usuario" autoFocus />
