@@ -57,7 +57,7 @@ function migrate(st: AppState): AppState {
   const v = st.v || 1;
   if (v < 2) {
     assignByText(st.framework, /^organizacion de eventos/i, "vargas");
-    assignByText(st.framework, /^pr, vocerias/i, "m");
+    assignByText(st.framework, /^pr, vocerías/i, "m");
     assignByText(st.framework, /^inteligencia de mercado/i, "talavera");
   }
   if (v < 3) {
@@ -128,12 +128,12 @@ export default function App() {
   function countOwned(pid: string) { return functionsOwnedBy(framework, pid).length; }
 
   function exportAll() {
-    let txt = "DIRECCION DE MARKETING - SM MEXICO\nRoles, estructura y funcionamiento\n\n";
+    let txt = "DIRECCIÓN DE MARKETING - SM MÉXICO\nRoles, estructura y funcionamiento\n\n";
     const walk = (id: string, depth: number) => {
       const n = people.find((p) => p.id === id); if (!n) return;
       const pad = "   ".repeat(depth);
       txt += pad + "* " + n.name + (n.title ? " - " + n.title : "") + "\n";
-      if (n.mission.trim()) txt += pad + "   Mision: " + n.mission.trim() + "\n";
+      if (n.mission.trim()) txt += pad + "   Misión: " + n.mission.trim() + "\n";
       if (n.lines && n.lines.length) txt += pad + "   Lineas: " + n.lines.join(", ") + "\n";
       if (n.notes.trim()) { txt += pad + "   Funciones:\n"; n.notes.split("\n").forEach((l) => { if (l.trim()) txt += pad + "     - " + l.trim() + "\n"; }); }
       if (n.kpis.trim()) txt += pad + "   KPIs: " + n.kpis.trim() + "\n";
@@ -141,7 +141,7 @@ export default function App() {
       childrenOf(people, id).forEach((c) => walk(c.id, depth + 1));
     };
     walk(rootId(people), 0);
-    txt += "\n=====================\nCOMO FUNCIONA LA DIRECCION\n\n" + framework.intro.trim() + "\n\n";
+    txt += "\n=====================\nCÓMO FUNCIONA LA DIRECCIÓN\n\n" + framework.intro.trim() + "\n\n";
     framework.blocks.forEach((b) => {
       txt += b.title + "\n";
       b.items.forEach((i) => {
@@ -152,7 +152,7 @@ export default function App() {
       txt += "\n";
     });
     if (framework.handoffs && framework.handoffs.length) {
-      txt += "TRASPASOS ENTRE AREAS\n";
+      txt += "TRASPASOS ENTRE ÁREAS\n";
       framework.handoffs.forEach((h) => { txt += "   - " + h.from + " -> " + h.to + ": " + h.desc + "\n"; });
       txt += "\n";
     }
@@ -168,13 +168,14 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#EFF1F4] text-[#15171C]">
       <header className="sticky top-0 z-20 flex flex-wrap items-center gap-3 border-b border-slate-200 bg-white px-5 py-3">
-        <div className="flex items-center"><SMLogo /></div>
+        <div className="flex items-center"><SMLogo showRegion={false} /></div>
+        <span className="mx-1 h-5 w-px bg-slate-200" />
         <span className="text-xs font-medium text-slate-500">{people.length} personas</span>
         <div className="ml-auto flex gap-2">
           <Button variant="outline" size="sm" onClick={exportAll}><Download className="mr-1 h-3.5 w-3.5" />Exportar</Button>
           <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={resetAll}><RotateCcw className="mr-1 h-3.5 w-3.5" />Restaurar</Button>
           <SyncBadge status={sync} onRefresh={refreshCloud} />
-          <Button variant="ghost" size="sm" onClick={logout} title="Cerrar sesion"><LogOut className="h-3.5 w-3.5" /></Button>
+          <Button variant="ghost" size="sm" onClick={logout} title="Cerrar sesión"><LogOut className="h-3.5 w-3.5" /></Button>
         </div>
       </header>
 
@@ -281,9 +282,9 @@ function OrgView(props: { people: Person[]; setPeople: (fn: (p: Person[]) => Per
       </svg>
       <ul className="tree" style={{ zoom }}>{renderNode(rootId(people))}</ul>
       <div className="mt-7 flex items-center gap-2 text-[11.5px] text-slate-400">
-        <span className="inline-block h-0 w-6 border-t-2 border-dashed border-amber-500" /> Linea punteada = dupla / colaboracion directa (no jerarquica)
+        <span className="inline-block h-0 w-6 border-t-2 border-dashed border-amber-500" /> Línea punteada = dupla / colaboracion directa (no jerárquica)
       </div>
-      <div className="mt-1.5 text-[11.5px] text-slate-400">Arrastra una tarjeta sobre otra para cambiar a quien reporta.</div>
+      <div className="mt-1.5 text-[11.5px] text-slate-400">Arrastra una tarjeta sobre otra para cambiar a quién reporta.</div>
       <StructureDialog people={people} setPeople={setPeople} editId={editId} onClose={() => setEditId(null)} />
       <div className="fixed bottom-6 right-6 z-30 flex items-center gap-0.5 rounded-full border border-slate-200 bg-white px-1.5 py-1 shadow-lg">
         <button onClick={() => setZoom((z) => Math.max(0.5, Math.round((z - 0.1) * 10) / 10))} className="flex h-8 w-8 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100" title="Alejar"><Minus className="h-4 w-4" /></button>
@@ -314,14 +315,14 @@ function StructureDialog(props: { people: Person[]; setPeople: (fn: (p: Person[]
         <DialogHeader><DialogTitle>Estructura</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <Field label="Nombre"><Input value={n.name} onChange={(e) => patch("name", e.target.value)} /></Field>
-          <Field label="Titulo / Puesto"><Input value={n.title} onChange={(e) => patch("title", e.target.value)} /></Field>
+          <Field label="Título / Puesto"><Input value={n.title} onChange={(e) => patch("title", e.target.value)} /></Field>
           <Field label="Reporta a">
             <select className="h-9 w-full rounded-md border border-slate-300 bg-white px-2 text-sm" value={n.parent === null ? "__root__" : n.parent} onChange={(e) => setParent(e.target.value)}>
-              <option value="__root__">— Nadie (raiz) —</option>
+              <option value="__root__">— Nadie (raíz) —</option>
               {options.map((o) => <option key={o.id} value={o.id}>{o.name}{o.title ? " · " + o.title : ""}</option>)}
             </select>
           </Field>
-          <p className="text-[11.5px] text-slate-400">El detalle del rol se edita en la pestana Roles.</p>
+          <p className="text-[11.5px] text-slate-400">El detalle del rol se edita en la pestaña Roles.</p>
         </div>
         <DialogFooter className="gap-2 sm:justify-between">
           {n.parent !== null ? <Button variant="outline" className="text-red-600" onClick={del}><Trash2 className="mr-1 h-3.5 w-3.5" />Eliminar</Button> : <span />}
@@ -372,32 +373,32 @@ function RolesView(props: { people: Person[]; setPeople: (fn: (p: Person[]) => P
 
       <section className="max-w-[760px] flex-1 overflow-y-auto px-8 pb-24 pt-6">
         <Input value={n.name} onChange={(e) => patch("name", e.target.value)} className="border-0 border-b border-dashed border-transparent px-0 text-[19px] font-extrabold tracking-tight focus-visible:border-[#E40521] focus-visible:ring-0" />
-        <Input value={n.title} onChange={(e) => patch("title", e.target.value)} placeholder="Titulo / Puesto" className="mt-1 max-w-[420px]" />
+        <Input value={n.title} onChange={(e) => patch("title", e.target.value)} placeholder="Título / Puesto" className="mt-1 max-w-[420px]" />
         <div className="mb-5 mt-2 text-xs text-slate-500">{boss ? <>Reporta a <b className="text-slate-700">{boss.name}</b>{boss.title ? " · " + boss.title : ""}</> : "Cabeza del organigrama"}</div>
 
-        <RoleField label="Mision del puesto" value={n.mission} onChange={(v) => patch("mission", v)} small />
+        <RoleField label="Misión del puesto" value={n.mission} onChange={(v) => patch("mission", v)} small />
         <RoleField label="Funciones y responsabilidades" value={n.notes} onChange={(v) => patch("notes", v)} />
         <div className="mt-4">
-          <div className="mb-1.5 text-[11.5px] font-bold uppercase tracking-wide text-slate-500">Alcance / lineas</div>
+          <div className="mb-1.5 text-[11.5px] font-bold uppercase tracking-wide text-slate-500">Alcance / líneas</div>
           <LinesMultiSelect selected={n.lines} onToggle={toggleLine} />
         </div>
-        <RoleField label="KPIs / resultados de los que es dueno" value={n.kpis} onChange={(v) => patch("kpis", v)} />
+        <RoleField label="KPIs / resultados de los que es dueño" value={n.kpis} onChange={(v) => patch("kpis", v)} />
 
         {reports > 0 && (
           <div className="mt-4">
-            <div className="mb-1.5 text-[11.5px] font-bold uppercase tracking-wide text-slate-500">Coordinacion de equipo (h/mes)</div>
+            <div className="mb-1.5 text-[11.5px] font-bold uppercase tracking-wide text-slate-500">Coordinación de equipo (h/mes)</div>
             <div className="flex items-center gap-2">
               <input type="number" min={0} value={coordVal} onChange={(e) => setCoord(Number(e.target.value) || 0)} className="w-24 rounded-md border border-slate-300 px-2.5 py-1.5 text-sm outline-none focus:border-blue-500" />
-              {isManualCoord && <button onClick={resetCoord} className="rounded-md border border-slate-300 px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">Usar automatico</button>}
+              {isManualCoord && <button onClick={resetCoord} className="rounded-md border border-slate-300 px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">Usar automático</button>}
             </div>
-            <div className="mt-1.5 text-[11.5px] text-slate-400">Automatico: {reports} reporte{reports !== 1 ? "s" : ""} x {COORD_PER_REPORT} = {autoCoord} h/mes. {isManualCoord ? "Estas usando un valor manual; se refleja en la carga de Funcionamiento." : "Usando el calculo automatico. Editalo para ajustar."}</div>
+            <div className="mt-1.5 text-[11.5px] text-slate-400">Automático: {reports} reporte{reports !== 1 ? "s" : ""} x {COORD_PER_REPORT} = {autoCoord} h/mes. {isManualCoord ? "Estas usando un valor manual; se refleja en la carga de Funcionamiento." : "Usando el calculo automático. Editalo para ajustar."}</div>
           </div>
         )}
 
         <div className="mt-6 border-t border-slate-200 pt-4">
-          <div className="mb-1 text-[11.5px] font-bold uppercase tracking-wide text-slate-500">Responsable de (funciones del area) · {owned.length}</div>
+          <div className="mb-1 text-[11.5px] font-bold uppercase tracking-wide text-slate-500">Responsable de (funciones del área) · {owned.length}</div>
           {owned.length === 0
-            ? <div className="py-1 text-[12.5px] text-slate-400">Sin funciones asignadas todavia. Se asignan en la pestana Funcionamiento.</div>
+            ? <div className="py-1 text-[12.5px] text-slate-400">Sin funciones asignadas todavia. Se asignan en la pestaña Funcionamiento.</div>
             : owned.map((o, i) => (
               <div key={i} className="flex items-baseline gap-2 border-b border-dashed border-slate-100 py-1.5 text-[12.5px]">
                 <span className="min-w-[84px] shrink-0 text-[10.5px] font-bold uppercase tracking-wide text-slate-400">{o.area}</span>
@@ -483,8 +484,8 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
   const setItemImpact = (bid: string, iid: string, v: Impact) => setFramework((f) => ({ ...f, blocks: f.blocks.map((b) => (b.id === bid ? { ...b, items: b.items.map((i) => (i.id === iid ? { ...i, impact: v } : i)) } : b)) }));
   const addOwner = (bid: string, iid: string, oid: string) => setFramework((f) => ({ ...f, blocks: f.blocks.map((b) => (b.id === bid ? { ...b, items: b.items.map((i) => (i.id === iid && !i.owners.includes(oid) ? { ...i, owners: [...i.owners, oid] } : i)) } : b)) }));
   const removeOwner = (bid: string, iid: string, oid: string) => setFramework((f) => ({ ...f, blocks: f.blocks.map((b) => (b.id === bid ? { ...b, items: b.items.map((i) => (i.id === iid ? { ...i, owners: i.owners.filter((o) => o !== oid) } : i)) } : b)) }));
-  const addItem = (bid: string) => setFramework((f) => ({ ...f, blocks: f.blocks.map((b) => (b.id === bid ? { ...b, items: [...b.items, { id: uid("i"), text: "Nueva funcion", owners: [], hours: 0, impact: "" }] } : b)) }));
-  const delItem = (bid: string, iid: string) => { if (!window.confirm("Eliminar esta funcion?")) return; setFramework((f) => ({ ...f, blocks: f.blocks.map((b) => (b.id === bid ? { ...b, items: b.items.filter((i) => i.id !== iid) } : b)) })); };
+  const addItem = (bid: string) => setFramework((f) => ({ ...f, blocks: f.blocks.map((b) => (b.id === bid ? { ...b, items: [...b.items, { id: uid("i"), text: "Nueva función", owners: [], hours: 0, impact: "" }] } : b)) }));
+  const delItem = (bid: string, iid: string) => { if (!window.confirm("Eliminar esta función?")) return; setFramework((f) => ({ ...f, blocks: f.blocks.map((b) => (b.id === bid ? { ...b, items: b.items.filter((i) => i.id !== iid) } : b)) })); };
   const addBlock = () => setFramework((f) => ({ ...f, blocks: [...f.blocks, { id: uid("b"), title: "Nuevo frente", items: [] }] }));
   const setHandoff = (id: string, k: keyof Handoff, v: string) => setFramework((f) => ({ ...f, handoffs: f.handoffs.map((h) => (h.id === id ? { ...h, [k]: v } : h)) }));
   const addHandoff = () => setFramework((f) => ({ ...f, handoffs: [...f.handoffs, { id: uid("h"), from: "", to: "", desc: "" }] }));
@@ -515,11 +516,10 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
 
   return (
     <div className="mx-auto max-w-[920px] px-6 pb-24 pt-7">
-      <h2 className="serif-display text-2xl font-bold tracking-tight text-[#15171C]">Como funciona la Direccion de Marketing</h2>
-      <p className="mt-0.5 text-[13px] text-slate-500">Cada funcion tiene responsables, horas/mes e impacto en negocio. Lo que asignes aqui se refleja en Organigrama y Roles.</p>
+      <h2 className="serif-display text-2xl font-bold tracking-tight text-[#15171C]">Cómo funciona la Dirección de Marketing</h2>
 
       <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
-        <AutoTextarea value={framework.intro} onChange={setIntro} placeholder="Resumen de la logica del area..." className="text-[13px] leading-relaxed text-slate-600" />
+        <AutoTextarea value={framework.intro} onChange={setIntro} placeholder="Resumen de la lógica del área..." className="text-[13px] leading-relaxed text-slate-600" />
       </div>
 
       <div className="mt-5 rounded-2xl border-2 border-slate-200 bg-slate-50/60 p-4">
@@ -568,7 +568,7 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
       {loadRows.length > 0 && (
         <div className="mt-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5">
           <div className="mb-2.5 flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Carga por persona ({filtersActive ? "filtrado, sin coordinacion" : "h/mes, incl. coordinacion"})</span>
+            <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Carga por persona ({filtersActive ? "filtrado, sin coordinación" : "h/mes, incl. coordinación"})</span>
             <span className="text-[11px] text-slate-400">Referencia: {CAPACITY_HOURS} h/mes = tiempo completo</span>
           </div>
           <div className="space-y-1.5">
@@ -580,7 +580,7 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
                   <span className="w-36 shrink-0 truncate text-[12.5px] font-medium text-slate-700">{x.name}{x.ext && <span className="ml-1 text-[10px] text-slate-400">ext</span>}</span>
                   <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
                     <div className={"absolute left-0 top-0 h-full " + barColor(x.hours, x.ext)} style={{ width: fhPct + "%" }} />
-                    {x.ch > 0 && <div className="absolute top-0 h-full bg-slate-400/70" style={{ left: fhPct + "%", width: chPct + "%" }} title={"Coordinacion " + x.ch + " h"} />}
+                    {x.ch > 0 && <div className="absolute top-0 h-full bg-slate-400/70" style={{ left: fhPct + "%", width: chPct + "%" }} title={"Coordinación " + x.ch + " h"} />}
                     <div className="absolute top-0 h-full w-px bg-slate-500/60" style={{ left: capPct + "%" }} title="Tiempo completo" />
                   </div>
                   <span className={"w-24 shrink-0 text-right text-[12.5px] font-bold tabular-nums " + (over ? "text-red-600" : "text-slate-700")}>{Math.round(x.hours)} h{x.ch > 0 && <span className="ml-1 text-[10px] font-normal text-slate-400">+{x.ch} coord</span>}</span>
@@ -611,13 +611,13 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
             </div>
             <div className="space-y-2 p-3">
               {items.length === 0
-                ? <div className="px-2 py-6 text-center text-[13px] text-slate-400">{filtersActive ? "Ningun resultado con los filtros actuales." : "Sin funciones todavia."}</div>
+                ? <div className="px-2 py-6 text-center text-[13px] text-slate-400">{filtersActive ? "Ningún resultado con los filtros actuales." : "Sin funciones todavia."}</div>
                 : items.map((item) => (
                   <FwItemRow key={item.id} people={people} item={item}
                     onText={(v) => setItemText(b.id, item.id, v)} onHours={(v) => setItemHours(b.id, item.id, v)} onImpact={(v) => setItemImpact(b.id, item.id, v)}
                     onAdd={(oid) => addOwner(b.id, item.id, oid)} onRemove={(oid) => removeOwner(b.id, item.id, oid)} onDelete={() => delItem(b.id, item.id)} />
                 ))}
-              {!onlyGaps && <button onClick={() => addItem(b.id)} className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-300 py-2 text-xs font-semibold text-slate-500 hover:border-slate-400 hover:bg-slate-50"><Plus className="h-3.5 w-3.5" />Agregar funcion</button>}
+              {!onlyGaps && <button onClick={() => addItem(b.id)} className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-300 py-2 text-xs font-semibold text-slate-500 hover:border-slate-400 hover:bg-slate-50"><Plus className="h-3.5 w-3.5" />Agregar función</button>}
             </div>
           </section>
         );
@@ -637,7 +637,7 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
                 <input value={h.to} onChange={(e) => setHandoff(h.id, "to", e.target.value)} placeholder="A..." className="min-w-0 flex-1 rounded-md bg-slate-50 px-2 py-1 text-[12.5px] font-semibold text-slate-700 outline-none focus:bg-slate-100" />
                 <button onClick={() => delHandoff(h.id)} className="p-1 text-slate-300 opacity-0 transition hover:text-red-600 group-hover:opacity-100"><Trash2 className="h-3.5 w-3.5" /></button>
               </div>
-              <AutoTextarea value={h.desc} onChange={(v) => setHandoff(h.id, "desc", v)} placeholder="Que se traspasa y cual es el riesgo si falla..." className="mt-1.5 text-[12.5px] leading-snug text-slate-600" />
+              <AutoTextarea value={h.desc} onChange={(v) => setHandoff(h.id, "desc", v)} placeholder="Qué se traspasa y cuál es el riesgo si falla..." className="mt-1.5 text-[12.5px] leading-snug text-slate-600" />
             </div>
           ))}
           <button onClick={addHandoff} className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-300 py-2 text-xs font-semibold text-slate-500 hover:border-slate-400 hover:bg-slate-50"><Plus className="h-3.5 w-3.5" />Agregar traspaso</button>
@@ -655,11 +655,11 @@ function SMLogo(props: { height?: number; showRegion?: boolean }) {
   const h = props.height || 26;
   return (
     <span className="inline-flex items-center gap-2.5">
-      <img src={SM_LOGO} alt="SM Mexico" style={{ height: h }} className="block w-auto" />
+      <img src={SM_LOGO} alt="SM México" style={{ height: h }} className="block w-auto" />
       {props.showRegion !== false && (
         <span className="flex items-baseline gap-1.5">
           <span className="text-slate-300">|</span>
-          <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">Mexico</span>
+          <span className="text-[12px] font-semibold uppercase tracking-wide text-slate-500">México</span>
         </span>
       )}
     </span>
@@ -670,7 +670,7 @@ function SyncBadge(props: { status: string; onRefresh: () => void }) {
     local: { text: "Local", dot: "bg-slate-400", cls: "text-slate-500" },
     saving: { text: "Guardando", dot: "bg-slate-500", cls: "text-slate-600" },
     synced: { text: "En la nube", dot: "bg-emerald-500", cls: "text-emerald-600" },
-    offline: { text: "Sin conexion", dot: "bg-amber-500", cls: "text-amber-600" },
+    offline: { text: "Sin conexión", dot: "bg-amber-500", cls: "text-amber-600" },
   };
   const s = map[props.status] || map.local;
   return (
@@ -763,14 +763,14 @@ function LoginScreen(props: { onSuccess: () => void }) {
       <form onSubmit={submit} className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
         <div className="mb-6 flex flex-col items-center text-center">
           <SMLogo height={34} showRegion={false} />
-          <h1 className="serif-display mt-3 text-2xl font-bold tracking-tight text-[#15171C]">Direccion de Marketing</h1>
-          <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#B00418]">SM Mexico</p>
+          <h1 className="serif-display mt-3 text-2xl font-bold tracking-tight text-[#15171C]">Dirección de Marketing</h1>
+          <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#B00418]">SM México</p>
         </div>
         <label className="mb-1.5 block text-[11.5px] font-bold uppercase tracking-wide text-slate-500">Usuario</label>
         <Input value={u} onChange={(e) => setU(e.target.value)} placeholder="Usuario" autoFocus />
-        <label className="mb-1.5 mt-4 block text-[11.5px] font-bold uppercase tracking-wide text-slate-500">Contrasena</label>
-        <Input type="password" value={p} onChange={(e) => setP(e.target.value)} placeholder="Contrasena" />
-        {err && <p className="mt-3 text-[12.5px] font-medium text-red-600">Usuario o contrasena incorrectos.</p>}
+        <label className="mb-1.5 mt-4 block text-[11.5px] font-bold uppercase tracking-wide text-slate-500">Contraseña</label>
+        <Input type="password" value={p} onChange={(e) => setP(e.target.value)} placeholder="Contraseña" />
+        {err && <p className="mt-3 text-[12.5px] font-medium text-red-600">Usuario o contraseña incorrectos.</p>}
         <Button type="submit" className="mt-5 w-full bg-[#E40521] text-white hover:bg-[#B00418]">Entrar</Button>
       </form>
     </div>
@@ -783,8 +783,8 @@ function BudgetView() {
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100"><Wallet className="h-8 w-8 text-slate-400" /></div>
       <h2 className="mt-4 text-xl font-extrabold tracking-tight text-slate-800">Presupuesto</h2>
-      <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-700">Proximamente</span>
-      <p className="mt-3 max-w-sm text-sm leading-relaxed text-slate-500">Aqui vivira el presupuesto del area y su cruce con resultados: impacto por peso. En construccion.</p>
+      <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-700">Próximamente</span>
+      <p className="mt-3 max-w-sm text-sm leading-relaxed text-slate-500">Aquí vivira el presupuesto del área y su cruce con resultados: impacto por peso. En construcción.</p>
     </div>
   );
 }
