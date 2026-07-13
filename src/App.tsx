@@ -56,7 +56,7 @@ function migrate(st: AppState): AppState {
   st.people.forEach((p) => { const d = DEFAULT_PEOPLE.find((x) => x.id === p.id); if (!Array.isArray(p.lines)) p.lines = d ? [...d.lines] : []; });
   const v = st.v || 1;
   if (v < 2) {
-    assignByText(st.framework, /^organizacion de eventos/i, "vargas");
+    assignByText(st.framework, /^organizaci.n de eventos/i, "vargas");
     assignByText(st.framework, /^pr, vocerías/i, "m");
     assignByText(st.framework, /^inteligencia de mercado/i, "talavera");
   }
@@ -282,7 +282,7 @@ function OrgView(props: { people: Person[]; setPeople: (fn: (p: Person[]) => Per
       </svg>
       <ul className="tree" style={{ zoom }}>{renderNode(rootId(people))}</ul>
       <div className="mt-7 flex items-center gap-2 text-[11.5px] text-slate-400">
-        <span className="inline-block h-0 w-6 border-t-2 border-dashed border-amber-500" /> Línea punteada = dupla / colaboracion directa (no jerárquica)
+        <span className="inline-block h-0 w-6 border-t-2 border-dashed border-amber-500" /> Línea punteada = dupla / colaboración directa (no jerárquica)
       </div>
       <div className="mt-1.5 text-[11.5px] text-slate-400">Arrastra una tarjeta sobre otra para cambiar a quién reporta.</div>
       <StructureDialog people={people} setPeople={setPeople} editId={editId} onClose={() => setEditId(null)} />
