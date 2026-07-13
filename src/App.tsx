@@ -502,17 +502,16 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
   filteredItems.forEach((i) => { ibh[i.impact || ""] += i.hours || 0; });
   const impactTotal = Math.max(1, ibh.alto + ibh.medio + ibh.bajo + ibh[""]);
 
-  const fnHours = (pid: string) => { let h = 0; filteredItems.forEach((i) => { if (i.owners.includes(pid) && i.owners.length > 0) h += (i.hours || 0) / i.owners.length; }); return h; };
+  const impactHoursFor = (pid: string) => {
+    const r: Record<string, number> = { alto: 0, medio: 0, bajo: 0, none: 0 };
+    filteredItems.forEach((i) => { if (i.owners.includes(pid) && i.owners.length > 0) { r[i.impact || "none"] += (i.hours || 0) / i.owners.length; } });
+    return r;
+  };
   const loadRows = orderedIds(people)
-    .map((id) => { const fh = fnHours(id); const ch = filtersActive ? 0 : coordHoursFor(people, id); return { id, name: ownerName(people, id), fh, ch, hours: fh + ch, ext: false }; })
-    .concat(EXT_OWNERS.map((e) => { const fh = fnHours(e.id); return { id: e.id, name: e.name, fh, ch: 0, hours: fh, ext: true }; }))
+    .map((id) => { const im = impactHoursFor(id); const fh = im.alto + im.medio + im.bajo + im.none; const ch = filtersActive ? 0 : coordHoursFor(people, id); return { id, name: ownerName(people, id), im, fh, ch, hours: fh + ch, ext: false }; })
+    .concat(EXT_OWNERS.map((e) => { const im = impactHoursFor(e.id); const fh = im.alto + im.medio + im.bajo + im.none; return { id: e.id, name: e.name, im, fh, ch: 0, hours: fh, ext: true }; }))
     .filter((x) => x.hours > 0).sort((a, b) => b.hours - a.hours);
   const maxHours = Math.max(CAPACITY_HOURS, ...loadRows.map((x) => x.hours));
-  function barColor(hours: number, ext: boolean): string {
-    if (ext) return "bg-slate-400";
-    const r = hours / CAPACITY_HOURS;
-    if (r > 1) return "bg-red-500"; if (r > 0.85) return "bg-amber-500"; return "bg-emerald-500";
-  }
 
   return (
     <div className="mx-auto max-w-[920px] px-6 pb-24 pt-7">
@@ -571,17 +570,30 @@ function FuncView(props: { people: Person[]; framework: Framework; setFramework:
             <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Carga por persona ({filtersActive ? "filtrado, sin coordinación" : "h/mes, incl. coordinación"})</span>
             <span className="text-[11px] text-slate-400">Referencia: {CAPACITY_HOURS} h/mes = tiempo completo</span>
           </div>
+          <div className="mb-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10.5px] text-slate-500">
+            <span className="font-semibold uppercase tracking-wide text-slate-400">Por impacto:</span>
+            <Legend color="bg-rose-500" label="Alto" />
+            <Legend color="bg-amber-400" label="Medio" />
+            <Legend color="bg-slate-300" label="Bajo" />
+            <Legend color="bg-slate-500/60" label="Coordinación" />
+          </div>
           <div className="space-y-1.5">
             {loadRows.map((x) => {
-              const fhPct = (x.fh / maxHours) * 100; const chPct = (x.ch / maxHours) * 100; const capPct = (CAPACITY_HOURS / maxHours) * 100;
+              const capPct = (CAPACITY_HOURS / maxHours) * 100;
               const over = !x.ext && x.hours > CAPACITY_HOURS;
+              const w = (h: number) => (h / maxHours) * 100 + "%";
               return (
                 <div key={x.id} className="flex items-center gap-3">
                   <span className="w-36 shrink-0 truncate text-[12.5px] font-medium text-slate-700">{x.name}{x.ext && <span className="ml-1 text-[10px] text-slate-400">ext</span>}</span>
                   <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                    <div className={"absolute left-0 top-0 h-full " + barColor(x.hours, x.ext)} style={{ width: fhPct + "%" }} />
-                    {x.ch > 0 && <div className="absolute top-0 h-full bg-slate-400/70" style={{ left: fhPct + "%", width: chPct + "%" }} title={"Coordinación " + x.ch + " h"} />}
-                    <div className="absolute top-0 h-full w-px bg-slate-500/60" style={{ left: capPct + "%" }} title="Tiempo completo" />
+                    <div className="flex h-full">
+                      {x.im.alto > 0 && <div className="h-full bg-rose-500" style={{ width: w(x.im.alto) }} title={"Alto " + Math.round(x.im.alto) + " h"} />}
+                      {x.im.medio > 0 && <div className="h-full bg-amber-400" style={{ width: w(x.im.medio) }} title={"Medio " + Math.round(x.im.medio) + " h"} />}
+                      {x.im.bajo > 0 && <div className="h-full bg-slate-300" style={{ width: w(x.im.bajo) }} title={"Bajo " + Math.round(x.im.bajo) + " h"} />}
+                      {x.im.none > 0 && <div className="h-full bg-slate-200" style={{ width: w(x.im.none) }} title={"Sin clasificar " + Math.round(x.im.none) + " h"} />}
+                      {x.ch > 0 && <div className="h-full bg-slate-500/60" style={{ width: w(x.ch) }} title={"Coordinación " + x.ch + " h"} />}
+                    </div>
+                    <div className="absolute top-0 h-full w-px bg-slate-600/70" style={{ left: capPct + "%" }} title="Tiempo completo" />
                   </div>
                   <span className={"w-24 shrink-0 text-right text-[12.5px] font-bold tabular-nums " + (over ? "text-red-600" : "text-slate-700")}>{Math.round(x.hours)} h{x.ch > 0 && <span className="ml-1 text-[10px] font-normal text-slate-400">+{x.ch} coord</span>}</span>
                 </div>
