@@ -66,7 +66,7 @@ Constantes clave (`data.ts`): `CAPACITY_HOURS = 160` (jornada completa/mes), `CO
 pnpm install
 node_modules/.bin/parcel build index.html --dist-dir dist --no-source-maps
 node_modules/.bin/html-inline dist/index.html > bundle_mod.html
-# post-proceso obligatorio (ver abajo) -> bundle.html
+node scripts/postprocess-bundle.mjs   # post-proceso (trampas 5.1 y 5.2) -> bundle.html
 ```
 
 ### 5.1 No metas `<link>` externos en `index.html`
@@ -82,6 +82,8 @@ Ojo: **`html-inline` emite la forma CON comillas** aunque Parcel use sin comilla
 `pnpm exec` dispara una verificación de dependencias que falla por `ERR_PNPM_IGNORED_BUILDS` (parcel/swc/lmdb). Usa `node_modules/.bin/<bin>`.
 
 ### 5.4 Compilar `data.ts` suelto (para generar el JSON semilla)
+Ya casi nunca hace falta: la semilla se regenera **desde la nube** con `node scripts/sync-seed.mjs`
+(reescribe la sección marcada de `src/data.ts`). El comando de abajo queda por referencia.
 ```bash
 node_modules/.bin/tsc src/data.ts --ignoreConfig --ignoreDeprecations 6.0 \
   --outDir /tmp/seed --module commonjs --target es2020 \
@@ -99,6 +101,10 @@ npx staticrypt@3.5.4 bundle.html -p 'SM2026_' --short \
 cp out/bundle.html docs/index.html   # esto es lo que sirve Pages
 ```
 GitHub Pages: Settings → Pages → branch `main`, carpeta `/docs`.
+
+### 5.6 `tsc`: `calendar.tsx` y `resizable.tsx` están excluidos
+Esos dos componentes shadcn del scaffold no se importan en ningún lado y sus tipos no
+compilan contra las librerías instaladas; están en `exclude` de `tsconfig.app.json`.
 
 ## 6. Supabase
 
@@ -132,9 +138,16 @@ set data = (select data from public.app_state_backup order by id limit 1),
 where a.id = 1;
 ```
 
+**Actualización 21 jul (tarde):** la semilla `DEFAULT_*` del código quedó **sincronizada con el
+estado vivo** (8 personas / 154 funciones, `SEED_VERSION 6`, sin migración destructiva).
+`app_state_backup` tiene ahora 2 filas: id=1 (escenario de 11 personas) e id=2 (estado vivo
+simulado, respaldo previo a la sincronización). Un borrador **no aplicado** de semilla v6 basada
+en el Excel (11 personas / 5 frentes, con migración que reemplazaba todo al cargar) quedó
+archivado en `Generales/Archivo/data.ts (borrador v6 Excel, 21 jul 2026, no aplicado).ts`.
+
 ## 8. Pendientes, en orden de importancia
 
-1. **`DEFAULT_*` del código está desincronizado con la nube.** El botón "Restaurar base" de la app revierte a una semilla vieja (8 personas / 40 funciones) y **destruiría** las 154 funciones reales. Sincronizar la semilla con el estado vivo, o proteger/eliminar el botón. *Es el riesgo más urgente.*
+1. ✅ **Resuelto y publicado (21 jul, tarde).** La semilla se regenera desde la nube (`node scripts/sync-seed.mjs`) y el botón «Restaurar» exige escribir la palabra RESTAURAR y avisa qué reemplaza y a quién afecta.
 2. **Decidir el estado vivo:** dejar el escenario simulado o restaurar las 11 personas desde el backup.
 3. **Pestaña Presupuesto:** convertirla en el cruce impacto ↔ peso. El presupuesto 2026 está en `Administración/Presupuesto/` de la carpeta OneDrive.
 4. **Vista de Resultados con datos reales** (reportes digitales Q4-2025/Q1-2026, numeralia de FIL y SIEI). Es lo que convierte la herramienta de "mapa del área" a "instrumento que acredita impacto".

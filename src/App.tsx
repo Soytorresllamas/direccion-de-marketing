@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Download, RotateCcw, Trash2, X, AlertTriangle, UserPlus, Megaphone, GraduationCap, Layers, Clock, ArrowRight, Minus, Wallet, LogOut } from "lucide-react";
+import { Plus, Download, RotateCcw, Trash2, X, AlertTriangle, UserPlus, Megaphone, Palette, Sparkles, Video, Headset, Compass, Layers, Clock, ArrowRight, Minus, Wallet, LogOut } from "lucide-react";
 
 const SB_URL = "https://zrooipzscpkagjdpyxic.supabase.co";
 const SB_KEY = "sb_publishable__6P7PyqfzqJ0ZN9YVYidpg_8BccM_1V";
@@ -72,6 +72,9 @@ function migrate(st: AppState): AppState {
       if (!Array.isArray(p.lines) || p.lines.length === 0) p.lines = [...d.lines];
     });
   }
+  // v6 (21 jul 2026): la semilla DEFAULT_* se regenera desde el estado vivo de la nube
+  // (node scripts/sync-seed.mjs). Sin migración de datos: la nube es la fuente de verdad
+  // y nunca se reemplaza nada al cargar.
   st.v = SEED_VERSION;
   return st;
 }
@@ -159,7 +162,15 @@ export default function App() {
     navigator.clipboard.writeText(txt).then(() => alert("Copiado al portapapeles."), () => window.prompt("Copia el texto:", txt));
   }
   function resetAll() {
-    if (!window.confirm("Restaurar la base? Se pierden los cambios.")) return;
+    const nFn = DEFAULT_FRAMEWORK.blocks.reduce((n, b) => n + b.items.length, 0);
+    const msg =
+      "Vas a reemplazar los datos actuales por la semilla del código: " +
+      DEFAULT_PEOPLE.length + " personas y " + nFn + " funciones (foto de la nube del 21 de julio de 2026).\n\n" +
+      "El reemplazo se sincroniza a la nube y afecta a TODOS los usuarios de la herramienta. " +
+      "No se puede deshacer desde la app.\n\n" +
+      "Escribe RESTAURAR para confirmar:";
+    const typed = window.prompt(msg);
+    if (typed === null || typed.trim().toUpperCase() !== "RESTAURAR") return;
     setState({ people: clone(DEFAULT_PEOPLE), framework: clone(DEFAULT_FRAMEWORK), v: SEED_VERSION });
   }
 
@@ -443,8 +454,12 @@ function LinesMultiSelect(props: { selected: string[]; onToggle: (line: string) 
 /* ---------------- FUNC VIEW ---------------- */
 interface Accent { bar: string; chipBorder: string; chipBg: string; text: string; Icon: typeof Megaphone; }
 const BLOCK_ACCENT: Record<string, Accent> = {
-  mkt: { bar: "bg-blue-500", chipBorder: "border-blue-200", chipBg: "bg-blue-50", text: "text-blue-700", Icon: Megaphone },
-  ped: { bar: "bg-emerald-500", chipBorder: "border-emerald-200", chipBg: "bg-emerald-50", text: "text-emerald-700", Icon: GraduationCap },
+  com: { bar: "bg-blue-500", chipBorder: "border-blue-200", chipBg: "bg-blue-50", text: "text-blue-700", Icon: Megaphone },
+  dis: { bar: "bg-violet-500", chipBorder: "border-violet-200", chipBg: "bg-violet-50", text: "text-violet-700", Icon: Palette },
+  marca: { bar: "bg-amber-500", chipBorder: "border-amber-200", chipBg: "bg-amber-50", text: "text-amber-700", Icon: Sparkles },
+  av: { bar: "bg-fuchsia-500", chipBorder: "border-fuchsia-200", chipBg: "bg-fuchsia-50", text: "text-fuchsia-700", Icon: Video },
+  cs: { bar: "bg-emerald-500", chipBorder: "border-emerald-200", chipBg: "bg-emerald-50", text: "text-emerald-700", Icon: Headset },
+  dir: { bar: "bg-red-500", chipBorder: "border-red-200", chipBg: "bg-red-50", text: "text-red-700", Icon: Compass },
 };
 function accentFor(id: string): Accent {
   return BLOCK_ACCENT[id] || { bar: "bg-slate-400", chipBorder: "border-slate-200", chipBg: "bg-slate-100", text: "text-slate-600", Icon: Layers };
