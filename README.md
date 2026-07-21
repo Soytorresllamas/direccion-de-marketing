@@ -1,5 +1,8 @@
 # Dirección de Marketing · SM México
 
+> **¿Vas a trabajar este proyecto con Claude Code o con otro agente?** Lee primero [`CONTEXTO-CLAUDE-CODE.md`](CONTEXTO-CLAUDE-CODE.md): arquitectura, pipeline de build, trampas conocidas y pendientes.
+
+
 **Abrir en la nube:** https://soytorresllamas.github.io/direccion-de-marketing/
 
 > Requiere activar GitHub Pages una vez (Settings → Pages → branch `main`, carpeta `/docs`). El sitio está cifrado: pide contraseña y luego el acceso de la app. Sincroniza con la base de datos en Supabase.
